@@ -1,14 +1,25 @@
+/**
+ * Dropdown Component
+ * -------------------
+ * Ce composant React affiche un menu déroulant personnalisable.
+ * Il permet à l'utilisateur de sélectionner une option depuis une liste.
+ * Il supporte la direction d'ouverture (haut/bas), le style personnalisable,
+ * la sélection contrôlée, les options désactivées et se ferme automatiquement
+ * lorsqu'on clique à l'extérieur.
+ */
+
 import React, { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
 
+// Props du composant Dropdown
 interface DropdownProps {
-  options: { label: string; value: string; disabled?: boolean }[];
-  onSelect: (value: string) => void;
-  label?: string;
-  direction?: "down" | "up";
-  buttonStyle?: React.CSSProperties;
-  itemStyle?: React.CSSProperties;
-  selectedValue?: string;
+  options: { label: string; value: string; disabled?: boolean }[]; // Liste des options à afficher
+  onSelect: (value: string) => void; // Callback appelé quand une option est sélectionnée
+  label?: string; // Label affiché au-dessus du bouton (par défaut : "Select an option")
+  direction?: "down" | "up"; // Direction d'ouverture du menu ("down" ou "up")
+  buttonStyle?: React.CSSProperties; // Style personnalisé pour le bouton
+  itemStyle?: React.CSSProperties; // Style personnalisé pour chaque option
+  selectedValue?: string; // Valeur sélectionnée actuelle (mode contrôlé)
 }
 
 const Dropdown: React.FC<DropdownProps> = ({
@@ -20,17 +31,20 @@ const Dropdown: React.FC<DropdownProps> = ({
   itemStyle,
   selectedValue,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [isOpen, setIsOpen] = useState(false); // État d'ouverture du menu
+  const dropdownRef = useRef<HTMLDivElement>(null); // Référence pour détecter les clics en dehors
 
+  // Ouvre ou ferme le menu
   const toggleDropdown = () => setIsOpen((prev) => !prev);
 
+  // Gère la sélection d'une option
   const handleSelect = (value: string, disabled?: boolean) => {
     if (disabled) return;
     onSelect(value);
     setIsOpen(false);
   };
 
+  // Ferme le menu si clic en dehors
   const handleOutsideClick = (event: MouseEvent) => {
     if (
       dropdownRef.current &&
@@ -40,6 +54,7 @@ const Dropdown: React.FC<DropdownProps> = ({
     }
   };
 
+  // Attache le listener au montage, et le retire au démontage
   useEffect(() => {
     document.addEventListener("mousedown", handleOutsideClick);
     return () => {
@@ -49,7 +64,10 @@ const Dropdown: React.FC<DropdownProps> = ({
 
   return (
     <DropdownContainer ref={dropdownRef}>
+      {/* Label du menu déroulant */}
       <DropdownLabel>{label}</DropdownLabel>
+
+      {/* Bouton principal */}
       <DropdownButton
         onClick={toggleDropdown}
         style={buttonStyle}
@@ -61,6 +79,7 @@ const Dropdown: React.FC<DropdownProps> = ({
         <Arrow>{isOpen ? "▲" : "▼"}</Arrow>
       </DropdownButton>
 
+      {/* Liste déroulante des options */}
       {isOpen && (
         <DropdownList direction={direction}>
           {options.map(({ label, value, disabled }, index) => (
@@ -81,18 +100,23 @@ const Dropdown: React.FC<DropdownProps> = ({
 
 export default Dropdown;
 
+/* -------------------- Styles -------------------- */
+
+// Conteneur global du dropdown
 const DropdownContainer = styled.div`
   position: relative;
   display: inline-block;
   width: 200px;
 `;
 
+// Label au-dessus du bouton
 const DropdownLabel = styled.span`
   display: block;
   margin-bottom: 8px;
   font-weight: bold;
 `;
 
+// Bouton qui affiche l'option sélectionnée
 const DropdownButton = styled.button`
   width: 100%;
   padding: 10px;
@@ -111,10 +135,12 @@ const DropdownButton = styled.button`
   }
 `;
 
+// Flèche de direction ▲ ▼
 const Arrow = styled.span`
   margin-left: 8px;
 `;
 
+// Liste des options
 const DropdownList = styled.ul<{ direction: "down" | "up" }>`
   position: absolute;
   top: ${({ direction }) => (direction === "down" ? "100%" : "auto")};
@@ -131,6 +157,7 @@ const DropdownList = styled.ul<{ direction: "down" | "up" }>`
   z-index: 1000;
 `;
 
+// Item (option) dans la liste
 const DropdownItem = styled.li<{ disabled?: boolean }>`
   padding: 10px;
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
